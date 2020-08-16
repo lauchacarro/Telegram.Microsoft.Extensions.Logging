@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Text;
 
 using Microsoft.Extensions.Logging.Telegram.Internal;
 
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 
 namespace Microsoft.Extensions.Logging.Telegram
 {
@@ -40,14 +42,29 @@ namespace Microsoft.Extensions.Logging.Telegram
                 return;
             }
 
+            StringBuilder message = new StringBuilder();
 
-            var message = formatter(state, exception);
+            message.Append(GetLogLevelString(logLevel));
+            message.Append("-");
+            message.Append(DateTime.Now.ToString(_config.TimeStampFormat));
+            message.Append("-");
+            message.Append(eventId.Id);
+            message.Append("-");
+            message.Append(_name);
+            message.Append("-");
+            message.Append(formatter(state, exception));
 
-            var log = $"{GetLogLevelString(logLevel)} - {DateTime.Now.ToString(_config.TimeStampFormat)} - {eventId.Id} - {_name} - {message}";
 
             if (exception != null)
             {
-                log = $"{log} - {exception}";
+                message.Append("-");
+                message.Append(exception);
+            }
+
+            if (logLevel >= _config.LogToStandardErrorThreshold && _config.BoldErrorLog)
+            {
+                message.Insert(0, "***");
+                message.Append("***");
             }
 
             if (_config.Async)
@@ -57,16 +74,37 @@ namespace Microsoft.Extensions.Logging.Telegram
                     BotToken = _config.BotToken,
                     ChatId = _config.ChatId,
                     LogAsError = logLevel >= LogLevel.Error,
-                    Message = log
+                    Message = message.ToString()
                 });
+
+                if (logLevel >= _config.LogToStandardErrorThreshold && _config.LogErrorChatId != 0)
+                {
+                    _taskQueue.QueueBackgroundWorkItem(new LogMessageEntry
+                    {
+                        BotToken = _config.BotToken,
+                        ChatId = _config.LogErrorChatId,
+                        LogAsError = logLevel >= LogLevel.Error,
+                        Message = message.ToString()
+                    });
+                }
             }
             else
             {
                 TelegramBotClient bot = new TelegramBotClient(_config.BotToken);
                 bot.SendTextMessageAsync(
                    chatId: _config.ChatId,
-                   text: log
+                   parseMode: ParseMode.Markdown,
+                   text: message.ToString()
                ).GetAwaiter().GetResult();
+
+                if (logLevel >= _config.LogToStandardErrorThreshold && _config.LogErrorChatId != 0)
+                {
+                    bot.SendTextMessageAsync(
+                       chatId: _config.LogErrorChatId,
+                       text: message.ToString(),
+                       parseMode: ParseMode.Markdown
+                    ).GetAwaiter().GetResult();
+                }
             }
         }
 

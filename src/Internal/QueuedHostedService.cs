@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 
 namespace Microsoft.Extensions.Logging.Telegram.Internal
 {
@@ -30,7 +31,8 @@ namespace Microsoft.Extensions.Logging.Telegram.Internal
                 TelegramBotClient bot = new TelegramBotClient(entry.BotToken);
                 await bot.SendTextMessageAsync(
                    chatId: entry.ChatId,
-                   text: entry.Message
+                   text: entry.Message,
+                   parseMode: ParseMode.Markdown
                );
             }
         }

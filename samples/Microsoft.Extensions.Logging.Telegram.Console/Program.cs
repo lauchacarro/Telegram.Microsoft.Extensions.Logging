@@ -14,7 +14,8 @@ namespace Microsoft.Extensions.Logging.Telegram.Sample
 
             IConfigurationBuilder builder = new ConfigurationBuilder()
              .SetBasePath(Directory.GetCurrentDirectory())
-             .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: false);
+             .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: false)
+             .AddJsonFile($"appsettings.Development.json", optional: false, reloadOnChange: false);
 
             IConfigurationRoot configuration = builder.Build();
 
