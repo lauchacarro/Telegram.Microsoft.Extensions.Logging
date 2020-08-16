@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
@@ -9,7 +10,7 @@ namespace Microsoft.Extensions.Logging.Telegram
 {
     public static class TelegramLoggerExtensions
     {
-        static public ILoggingBuilder AddTelegramLogger(this ILoggingBuilder builder)
+        public static ILoggingBuilder AddTelegramLogger(this ILoggingBuilder builder)
         {
             builder.AddConfiguration();
 
@@ -27,7 +28,7 @@ namespace Microsoft.Extensions.Logging.Telegram
             return builder;
         }
 
-        static public ILoggingBuilder AddTelegramLogger
+        public static ILoggingBuilder AddTelegramLogger
                (this ILoggingBuilder builder, Action<TelegramLoggerOptions> configure)
         {
             if (configure == null)

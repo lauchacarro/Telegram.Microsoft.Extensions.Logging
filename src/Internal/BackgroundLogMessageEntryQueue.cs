@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,11 +15,6 @@ namespace Microsoft.Extensions.Logging.Telegram.Internal
 
         public void QueueBackgroundWorkItem(LogMessageEntry entry)
         {
-            if (entry == null)
-            {
-                throw new ArgumentNullException(nameof(entry));
-            }
-
             _entries.Enqueue(entry);
             _signal.Release();
         }

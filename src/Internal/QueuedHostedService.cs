@@ -1,7 +1,8 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Hosting;
+
 using Telegram.Bot;
 
 namespace Microsoft.Extensions.Logging.Telegram.Internal

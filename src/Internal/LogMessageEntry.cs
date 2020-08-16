@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Microsoft.Extensions.Logging.Telegram.Internal
+﻿namespace Microsoft.Extensions.Logging.Telegram.Internal
 {
-    public class LogMessageEntry
+    public struct LogMessageEntry
     {
         public string LevelString;
         public string Message;
