@@ -2,11 +2,15 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
-using Microsoft.Extensions.Logging.Telegram.Internal;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.Extensions.Logging.Telegram
+using Telegram.Bot;
+using Telegram.Microsoft.Extensions.Logging.Internal;
+using Telegram.Microsoft.Extensions.Logging.Internal.Services;
+
+namespace Telegram.Microsoft.Extensions.Logging
 {
     public static class TelegramLoggerExtensions
     {
@@ -14,17 +18,25 @@ namespace Microsoft.Extensions.Logging.Telegram
         {
             builder.AddConfiguration();
 
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, TelegramLoggerProvider>());
 
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider,
-            TelegramLoggerProvider>());
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton
-               <IConfigureOptions<TelegramLoggerOptions>, TelegramLoggerOptionsSetup>());
-            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton
-               <IOptionsChangeTokenSource<TelegramLoggerOptions>,
-            LoggerProviderOptionsChangeTokenSource<TelegramLoggerOptions, TelegramLoggerProvider>>());
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<TelegramLoggerOptions>, TelegramLoggerOptionsSetup>());
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IOptionsChangeTokenSource<TelegramLoggerOptions>, LoggerProviderOptionsChangeTokenSource<TelegramLoggerOptions, TelegramLoggerProvider>>());
+
+            var telegramLoggerOptions = builder.Services.BuildServiceProvider().GetRequiredService<IOptionsMonitor<TelegramLoggerOptions>>();
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, TelegramLoggerProvider>());
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ITelegramBotClient>(new TelegramBotClient(telegramLoggerOptions.CurrentValue.BotToken)));
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ITelegramMessageService, TelegramMessageService>());
 
             builder.Services.AddHostedService<QueuedHostedService>();
-            builder.Services.AddSingleton<IBackgroundLogMessageEntryQueue, BackgroundLogMessageEntryQueue>();
+
+
+            builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IBackgroundLogMessageEntryQueue, BackgroundLogMessageEntryQueue>());
+
             return builder;
         }
 

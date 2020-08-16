@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Extensions.Logging.Telegram
+﻿using Microsoft.Extensions.Logging;
+
+namespace Telegram.Microsoft.Extensions.Logging
 {
     public class TelegramLoggerOptions
     {

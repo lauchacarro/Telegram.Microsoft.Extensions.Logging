@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Microsoft.Extensions.Logging.Telegram.Sample.Web": {
+    "Telegram.Microsoft.Extensions.Logging.Sample.Web": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "weatherforecast",

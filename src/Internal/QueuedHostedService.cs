@@ -3,19 +3,19 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
 
-using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
+using Telegram.Microsoft.Extensions.Logging.Internal.Services;
 
-namespace Microsoft.Extensions.Logging.Telegram.Internal
+namespace Telegram.Microsoft.Extensions.Logging.Internal
 {
     public class QueuedHostedService : BackgroundService
     {
-        public QueuedHostedService(IBackgroundLogMessageEntryQueue taskQueue)
+        private readonly ITelegramMessageService _telegramMessageService;
+        private readonly IBackgroundLogMessageEntryQueue _taskQueue;
+        public QueuedHostedService(IBackgroundLogMessageEntryQueue taskQueue, ITelegramMessageService telegramMessageService)
         {
-            TaskQueue = taskQueue;
+            _taskQueue = taskQueue;
+            _telegramMessageService = telegramMessageService;
         }
-
-        public IBackgroundLogMessageEntryQueue TaskQueue { get; }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -26,14 +26,9 @@ namespace Microsoft.Extensions.Logging.Telegram.Internal
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var entry = await TaskQueue.DequeueAsync(stoppingToken);
+                var entry = await _taskQueue.DequeueAsync(stoppingToken);
 
-                TelegramBotClient bot = new TelegramBotClient(entry.BotToken);
-                await bot.SendTextMessageAsync(
-                   chatId: entry.ChatId,
-                   text: entry.Message,
-                   parseMode: ParseMode.Markdown
-               );
+                await _telegramMessageService.SendMessage(entry);
             }
         }
     }

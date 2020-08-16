@@ -1,9 +1,12 @@
 ﻿using System.Collections.Concurrent;
 
-using Microsoft.Extensions.Logging.Telegram.Internal;
+using Microsoft.Extensions.Logging;
+
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.Extensions.Logging.Telegram
+using Telegram.Microsoft.Extensions.Logging.Internal.Services;
+
+namespace Telegram.Microsoft.Extensions.Logging
 {
     [ProviderAlias("Telegram")]
     public class TelegramLoggerProvider : ILoggerProvider
@@ -12,17 +15,17 @@ namespace Microsoft.Extensions.Logging.Telegram
 
         private readonly ConcurrentDictionary<string, TelegramLogger> _loggers = new ConcurrentDictionary<string, TelegramLogger>();
 
-        private readonly IBackgroundLogMessageEntryQueue _entryQueue;
+        private readonly ITelegramMessageService _telegramMessageService;
 
-        public TelegramLoggerProvider(IOptionsMonitor<TelegramLoggerOptions> config, IBackgroundLogMessageEntryQueue entryQueue)
+        public TelegramLoggerProvider(IOptionsMonitor<TelegramLoggerOptions> config, ITelegramMessageService telegramMessageService)
         {
             _config = config.CurrentValue;
-            _entryQueue = entryQueue;
+            _telegramMessageService = telegramMessageService;
         }
 
         public ILogger CreateLogger(string categoryName)
         {
-            return _loggers.GetOrAdd(categoryName, name => new TelegramLogger(name, _config, _entryQueue));
+            return _loggers.GetOrAdd(categoryName, name => new TelegramLogger(name, _config, _telegramMessageService));
         }
 
         public void Dispose()

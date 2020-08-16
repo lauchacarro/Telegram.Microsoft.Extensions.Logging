@@ -3,8 +3,9 @@ using System.IO;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace Microsoft.Extensions.Logging.Telegram.Sample
+namespace Telegram.Microsoft.Extensions.Logging.Sample
 {
     class Program
     {

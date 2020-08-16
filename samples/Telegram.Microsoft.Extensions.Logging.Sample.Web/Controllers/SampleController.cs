@@ -1,8 +1,9 @@
 ﻿using System;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
-namespace Microsoft.Extensions.Logging.Telegram.Sample.Web.Controllers
+namespace Telegram.Microsoft.Extensions.Logging.Sample.Web.Controllers
 {
     [Route("[controller]")]
     [ApiController]

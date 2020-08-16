@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace Microsoft.Extensions.Logging.Telegram
+namespace Telegram.Microsoft.Extensions.Logging
 {
     public class TelegramLoggerOptionsSetup : ConfigureFromConfigurationOptions<TelegramLoggerOptions>
     {

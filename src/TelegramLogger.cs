@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Text;
 
-using Microsoft.Extensions.Logging.Telegram.Internal;
+using Microsoft.Extensions.Logging;
 
-using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
+using Telegram.Microsoft.Extensions.Logging.Internal;
+using Telegram.Microsoft.Extensions.Logging.Internal.Services;
 
-namespace Microsoft.Extensions.Logging.Telegram
+namespace Telegram.Microsoft.Extensions.Logging
 {
     public class TelegramLogger : ILogger
     {
         private readonly string _name;
         private readonly TelegramLoggerOptions _config;
-        private readonly IBackgroundLogMessageEntryQueue _taskQueue;
+        private readonly ITelegramMessageService _telegramMessageService;
 
-        public TelegramLogger(string name, TelegramLoggerOptions config, IBackgroundLogMessageEntryQueue taskQueue)
+        public TelegramLogger(string name, TelegramLoggerOptions config, ITelegramMessageService telegramMessageService)
         {
             _name = name;
             _config = config;
-            _taskQueue = taskQueue;
+            _telegramMessageService = telegramMessageService;
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -54,7 +54,6 @@ namespace Microsoft.Extensions.Logging.Telegram
             message.Append("-");
             message.Append(formatter(state, exception));
 
-
             if (exception != null)
             {
                 message.Append("-");
@@ -69,65 +68,51 @@ namespace Microsoft.Extensions.Logging.Telegram
 
             if (_config.Async)
             {
-                _taskQueue.QueueBackgroundWorkItem(new LogMessageEntry
+                _telegramMessageService.QueueMessage(new LogMessageEntry
                 {
-                    BotToken = _config.BotToken,
                     ChatId = _config.ChatId,
-                    LogAsError = logLevel >= LogLevel.Error,
                     Message = message.ToString()
                 });
 
                 if (logLevel >= _config.LogToStandardErrorThreshold && _config.LogErrorChatId != 0)
                 {
-                    _taskQueue.QueueBackgroundWorkItem(new LogMessageEntry
+                    _telegramMessageService.QueueMessage(new LogMessageEntry
                     {
-                        BotToken = _config.BotToken,
                         ChatId = _config.LogErrorChatId,
-                        LogAsError = logLevel >= LogLevel.Error,
                         Message = message.ToString()
                     });
                 }
             }
             else
             {
-                TelegramBotClient bot = new TelegramBotClient(_config.BotToken);
-                bot.SendTextMessageAsync(
-                   chatId: _config.ChatId,
-                   parseMode: ParseMode.Markdown,
-                   text: message.ToString()
-               ).GetAwaiter().GetResult();
+                _telegramMessageService.SendMessage(new LogMessageEntry
+                {
+                    ChatId = _config.ChatId,
+                    Message = message.ToString()
+                }).GetAwaiter().GetResult();
 
                 if (logLevel >= _config.LogToStandardErrorThreshold && _config.LogErrorChatId != 0)
                 {
-                    bot.SendTextMessageAsync(
-                       chatId: _config.LogErrorChatId,
-                       text: message.ToString(),
-                       parseMode: ParseMode.Markdown
-                    ).GetAwaiter().GetResult();
+                    _telegramMessageService.SendMessage(new LogMessageEntry
+                    {
+                        ChatId = _config.LogErrorChatId,
+                        Message = message.ToString()
+                    }).GetAwaiter().GetResult();
                 }
             }
         }
 
-        private static string GetLogLevelString(LogLevel logLevel)
-        {
-            switch (logLevel)
-            {
-                case LogLevel.Trace:
-                    return "trce";
-                case LogLevel.Debug:
-                    return "dbug";
-                case LogLevel.Information:
-                    return "info";
-                case LogLevel.Warning:
-                    return "warn";
-                case LogLevel.Error:
-                    return "fail";
-                case LogLevel.Critical:
-                    return "crit";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(logLevel));
-            }
-        }
+        private static string GetLogLevelString(LogLevel logLevel) =>
 
+             logLevel switch
+             {
+                 LogLevel.Trace => "trce",
+                 LogLevel.Debug => "dbug",
+                 LogLevel.Information => "info",
+                 LogLevel.Warning => "warn",
+                 LogLevel.Error => "fail",
+                 LogLevel.Critical => "crit",
+                 _ => throw new ArgumentOutOfRangeException(nameof(logLevel))
+             };
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Extensions.Logging.Telegram.Internal
+namespace Telegram.Microsoft.Extensions.Logging.Internal
 {
     public interface IBackgroundLogMessageEntryQueue
     {

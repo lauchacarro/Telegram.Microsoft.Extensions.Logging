@@ -1,11 +1,8 @@
-﻿namespace Microsoft.Extensions.Logging.Telegram.Internal
+﻿namespace Telegram.Microsoft.Extensions.Logging.Internal
 {
     public struct LogMessageEntry
     {
-        public string LevelString;
-        public string Message;
-        public bool LogAsError;
-        public string BotToken;
-        public long ChatId;
+        public string Message { get; set; }
+        public long ChatId { get; set; }
     }
 }

@@ -1,11 +1,10 @@
-
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Microsoft.Extensions.Logging.Telegram.Sample.Web
+namespace Telegram.Microsoft.Extensions.Logging.Sample.Web
 {
     public class Startup
     {
