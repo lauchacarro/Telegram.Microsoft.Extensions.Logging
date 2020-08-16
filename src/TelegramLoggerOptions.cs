@@ -2,7 +2,7 @@
 {
     public class TelegramLoggerOptions
     {
-        public LogLevel LogLevel { get; set; } = LogLevel.Debug;
+        public LogLevel LogLevel { get; set; } = LogLevel.Trace;
         public int EventId { get; set; }
         public long ChatId { get; set; }
         public string BotToken { get; set; }

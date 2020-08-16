@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,12 +21,11 @@ namespace Microsoft.Extensions.Logging.Telegram.Sample
 
             IServiceProvider serviceProvider = new ServiceCollection()
                 .AddSingleton(configuration)
-                .AddLogging(x => x.AddTelegramLogger(o =>
+                .AddLogging((logging) =>
                 {
-                    o.BotToken = configuration["Logging:Telegram:BotToken"];
-                    o.ChatId = Convert.ToInt64(configuration["Logging:Telegram:ChatId"]);
-                    o.TimeStampFormat = configuration["Logging:Telegram:TimeStampFormat"];
-                }))
+                    logging.AddConfiguration(configuration.GetSection("Logging"));
+                    logging.AddTelegramLogger();
+                })
                 .BuildServiceProvider();
 
             #endregion
@@ -34,7 +34,12 @@ namespace Microsoft.Extensions.Logging.Telegram.Sample
 
             ILogger<Program> logger = loggerFactory.CreateLogger<Program>();
 
-            logger.LogInformation("Test");
+
+
+            for (int i = 0; i < 30; i++)
+            {
+                logger.LogInformation($"Test {i}");
+            }
 
             try
             {
