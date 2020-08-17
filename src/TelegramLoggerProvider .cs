@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
 
@@ -29,6 +30,12 @@ namespace Telegram.Microsoft.Extensions.Logging
         }
 
         public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
         {
             _loggers.Clear();
         }

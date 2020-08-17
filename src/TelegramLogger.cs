@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
 
 using Microsoft.Extensions.Logging;
 
+using Telegram.Microsoft.Extensions.Logging.Helpers;
 using Telegram.Microsoft.Extensions.Logging.Internal;
 using Telegram.Microsoft.Extensions.Logging.Internal.Services;
 
@@ -42,29 +43,21 @@ namespace Telegram.Microsoft.Extensions.Logging
                 return;
             }
 
-            StringBuilder message = new StringBuilder();
-
-            message.Append(GetLogLevelString(logLevel));
-            message.Append("-");
-            message.Append(DateTime.Now.ToString(_config.TimeStampFormat));
-            message.Append("-");
-            message.Append(eventId.Id);
-            message.Append("-");
-            message.Append(_name);
-            message.Append("-");
-            message.Append(formatter(state, exception));
-
-            if (exception != null)
+            var variableValues = new Dictionary<string, object>
             {
-                message.Append("-");
-                message.Append(exception);
-            }
+                ["LogLevel"] = logLevel,
+                ["LogLevelSmall"] = GetLogLevelString(logLevel),
+                ["DateTime"] = DateTime.Now.ToString(_config.TimeStampFormat),
+                ["EventId"] = eventId.Id,
+                ["Name"] = _name,
+                ["State"] = formatter(state, exception),
+                ["Exception"] = exception?.ToString() ?? string.Empty
+            };
 
-            if (logLevel >= _config.LogToStandardErrorThreshold && _config.BoldErrorLog)
-            {
-                message.Insert(0, "***");
-                message.Append("***");
-            }
+            string message = StringTemplate.Render(
+                logLevel < _config.LogToStandardErrorThreshold ? _config.LogFormat : _config.LogErrorFormat,
+                variableValues);
+
 
             if (_config.Async)
             {
